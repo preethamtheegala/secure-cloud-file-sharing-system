@@ -1,24 +1,20 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+const activitySchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
     },
-
     email: {
       type: String,
-      required: true,
-      unique: true
+      required: true
     },
-
-    password: {
+    action: {
       type: String,
       required: true
     },
-
-    profileImage: {
+    fileName: {
       type: String,
       default: ""
     }
@@ -29,6 +25,6 @@ const userSchema = new mongoose.Schema(
 );
 
 export default mongoose.model(
-  "User",
-  userSchema
+  "Activity",
+  activitySchema
 );

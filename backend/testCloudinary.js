@@ -9,5 +9,13 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET
 });
 
-
-export default cloudinary;
+cloudinary.api
+  .ping()
+  .then((result) => {
+    console.log("SUCCESS");
+    console.log(result);
+  })
+  .catch((error) => {
+    console.log("ERROR");
+    console.log(error);
+  });
