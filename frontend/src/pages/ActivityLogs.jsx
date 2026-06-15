@@ -1,77 +1,100 @@
-import {
-FaUpload,
-FaDownload,
-FaShareAlt,
-FaShieldAlt
-} from "react-icons/fa";
+import { useEffect, useState } from "react";
+import api from "../services/api";
 
 function ActivityLogs() {
+
+  const [logs, setLogs] =
+    useState([]);
+
+  const [search, setSearch] =
+    useState("");
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const fetchLogs = async () => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const res =
+        await api.get(
+          "/activity",
+          {
+            headers: {
+              Authorization:
+                `Bearer ${token}`
+            }
+          }
+        );
+
+      setLogs(res.data);
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
+
+  };
+
+  const filteredLogs =
+    logs.filter((log) =>
+      log.action
+        .toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
+
   return (
     <div className="container py-5">
 
       <h1 className="mb-4">
-        Security Activity Timeline
+        Activity Logs
       </h1>
 
-      <div className="glass-card">
+      <input
+        type="text"
+        className="form-control mb-4"
+        placeholder="Search Activity..."
+        value={search}
+        onChange={(e) =>
+          setSearch(
+            e.target.value
+          )
+        }
+      />
 
-        <div className="mb-4">
+      {filteredLogs.map(
+        (log) => (
 
-          <FaUpload
-            className="text-info me-3"
-          />
+          <div
+            key={log._id}
+            className="glass-card mb-3"
+          >
 
-          Uploaded report.pdf
+            <h5>
+              {log.action}
+            </h5>
 
-          <small className="ms-3 text-secondary">
-            10:30 AM
-          </small>
+            <p>
+              {log.fileName}
+            </p>
 
-        </div>
+            <small>
+              {new Date(
+                log.createdAt
+              ).toLocaleString()}
+            </small>
 
-        <div className="mb-4">
+          </div>
 
-          <FaShareAlt
-            className="text-warning me-3"
-          />
-
-          Shared report.pdf
-
-          <small className="ms-3 text-secondary">
-            11:00 AM
-          </small>
-
-        </div>
-
-        <div className="mb-4">
-
-          <FaDownload
-            className="text-success me-3"
-          />
-
-          Downloaded invoice.pdf
-
-          <small className="ms-3 text-secondary">
-            11:45 AM
-          </small>
-
-        </div>
-
-        <div>
-
-          <FaShieldAlt
-            className="text-primary me-3"
-          />
-
-          Security scan completed
-
-          <small className="ms-3 text-secondary">
-            12:10 PM
-          </small>
-
-        </div>
-
-      </div>
+        )
+      )}
 
     </div>
   );

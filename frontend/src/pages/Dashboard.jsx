@@ -9,7 +9,9 @@ import {
 import photo from "../assets/photo.png";
 
 function Dashboard() {
+
   return (
+
     <div className="container py-5">
 
       <div className="glass-card mb-5">
@@ -174,6 +176,7 @@ function Dashboard() {
       </div>
 
     </div>
+
   );
 }
 
