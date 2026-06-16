@@ -2,9 +2,12 @@ import crypto from "crypto";
 
 const algorithm = "aes-256-cbc";
 
-const key = crypto
+  const key = crypto
   .createHash("sha256")
-  .update(process.env.ENCRYPTION_KEY)
+  .update(
+    process.env.ENCRYPTION_KEY ||
+    "securecloudencryptionkey123456789"
+  )
   .digest();
 
 export const encryptBuffer = (
