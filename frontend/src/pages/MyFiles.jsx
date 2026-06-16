@@ -17,6 +17,15 @@ import api from "../services/api";
 
 function MyFiles() {
 
+  const [showShareModal, setShowShareModal] = useState(false);
+const [selectedFileId, setSelectedFileId] = useState("");
+const [shareEmail, setShareEmail] = useState("");
+const [permission, setPermission] = useState("view");
+const [days, setDays] = useState(1);
+
+const [showLinkModal, setShowLinkModal] = useState(false);
+const [secureLink, setSecureLink] = useState("");
+
   const [files, setFiles] =
     useState([]);
 
@@ -192,7 +201,7 @@ function MyFiles() {
                 `Bearer ${token}`
             }
           }
-        );
+        );ß
 
         fetchFiles();
 
@@ -204,27 +213,61 @@ function MyFiles() {
 
     };
 
-  const shareFile =
-    async (id) => {
+  const shareFile = async () => {
 
-      const email =
-        prompt(
-          "Enter email to share this file"
-        );
+  try {
 
-      if (!email)
-        return;
+    const token =
+      localStorage.getItem("token");
 
-      try {
+    await api.put(
+      `/files/share/${selectedFileId}`,
+      {
+        email: shareEmail,
+        permission,
+        days
+      },
+      {
+        headers: {
+          Authorization:
+            `Bearer ${token}`
+        }
+      }
+    );
 
-        const token =
-          localStorage.getItem(
-            "token"
-          );
+    alert(
+      "File Shared Successfully"
+    );
 
-        await api.put(
-          `/files/share/${id}`,
-          { email },
+    setShowShareModal(false);
+
+    setShareEmail("");
+    setPermission("view");
+    setDays(1);
+    setSelectedFileId("");
+
+  } catch (error) {
+
+    alert(
+      error.response?.data?.message ||
+      "Share Failed"
+    );
+
+  }
+
+};
+
+const generateSecureLink =
+  async (id) => {
+
+    try {
+
+      const token =
+        localStorage.getItem("token");
+
+      const res =
+        await api.get(
+          `/files/secure-link/${id}`,
           {
             headers: {
               Authorization:
@@ -233,31 +276,77 @@ function MyFiles() {
           }
         );
 
-        alert(
-          "File Shared Successfully"
-        );
+      const link =
+        `http://localhost:8000/api/files/access/${res.data.token}`;
 
-      } catch (error) {
+      setSecureLink(link);
 
-        console.log(error);
+      setShowLinkModal(true);
 
-        alert(
-          "Share Failed"
-        );
+    } catch (error) {
 
-      }
+      console.log(error);
 
-    };
+    }
 
-  const viewFile =
-    (url) => {
+  };
 
-      window.open(
-        url,
-        "_blank"
-      );
+  const copySecureLink = () => {
 
-    };
+  navigator.clipboard.writeText(
+    secureLink
+  );
+
+  alert(
+    "Link Copied"
+  );
+
+};
+
+
+
+  const viewFile = (
+  url,
+  fileName
+) => {
+
+  const ext =
+    fileName
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+  const viewableTypes = [
+    "pdf",
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "webp"
+  ];
+
+  if (
+    viewableTypes.includes(
+      ext
+    )
+  ) {
+
+    window.open(
+      url,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
+  } else {
+
+    downloadFile(
+      url,
+      fileName
+    );
+
+  }
+
+};
 
   const downloadFile =
     async (
@@ -457,7 +546,8 @@ function MyFiles() {
                         title="View"
                         onClick={() =>
                           viewFile(
-                            file.fileUrl
+                            file.fileUrl,
+                            file.fileName
                           )
                         }
                       />
@@ -488,12 +578,24 @@ function MyFiles() {
                             "18px"
                         }}
                         title="Share"
-                        onClick={() =>
-                          shareFile(
+                        onClick={() => {
+                          setSelectedFileId(
                             file._id
-                          )
-                        }
+                          );
+                          setShowShareModal(true);
+                        }}
                       />
+
+                      <button
+  className="btn btn-sm btn-info me-2"
+  onClick={() =>
+    generateSecureLink(
+      file._id
+    )
+  }
+>
+  Link
+</button>
 
                       <FaTrash
                         className="text-danger"
@@ -525,6 +627,168 @@ function MyFiles() {
         </table>
 
       </div>
+
+      {showShareModal && (
+
+<div
+  className="modal d-block"
+  tabIndex="-1"
+>
+
+  <div className="modal-dialog">
+
+    <div className="modal-content bg-dark text-white">
+
+      <div className="modal-header">
+
+        <h5>
+          Share File
+        </h5>
+
+        <button
+          className="btn-close btn-close-white"
+          onClick={() =>
+            setShowShareModal(false)
+          }
+        />
+
+      </div>
+
+      <div className="modal-body">
+
+        <input
+          type="email"
+          className="form-control mb-3"
+          placeholder="Email"
+          value={shareEmail}
+          onChange={(e) =>
+            setShareEmail(
+              e.target.value
+            )
+          }
+        />
+
+        <select
+          className="form-select mb-3"
+          value={permission}
+          onChange={(e) =>
+            setPermission(
+              e.target.value
+            )
+          }
+        >
+
+          <option value="view">
+            View
+          </option>
+
+          <option value="download">
+            Download
+          </option>
+
+        </select>
+
+        <select
+          className="form-select"
+          value={days}
+          onChange={(e) =>
+            setDays(
+              Number(
+                e.target.value
+              )
+            )
+          }
+        >
+
+          <option value="1">
+            1 Day
+          </option>
+
+          <option value="7">
+            7 Days
+          </option>
+
+          <option value="30">
+            30 Days
+          </option>
+
+        </select>
+
+      </div>
+
+      <div className="modal-footer">
+
+        <button
+          className="btn btn-primary"
+          onClick={shareFile}
+        >
+          Share
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
+{showLinkModal && (
+
+<div
+  className="modal d-block"
+  tabIndex="-1"
+>
+
+  <div className="modal-dialog">
+
+    <div className="modal-content bg-dark text-white">
+
+      <div className="modal-header">
+
+        <h5>
+          Secure Link
+        </h5>
+
+        <button
+          className="btn-close btn-close-white"
+          onClick={() =>
+            setShowLinkModal(false)
+          }
+        />
+
+      </div>
+
+      <div className="modal-body">
+
+        <input
+          type="text"
+          className="form-control"
+          value={secureLink}
+          readOnly
+        />
+
+      </div>
+
+      <div className="modal-footer">
+
+        <button
+          className="btn btn-success"
+          onClick={copySecureLink}
+        >
+          Copy Link
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+)}
 
     </div>
 

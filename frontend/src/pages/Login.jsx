@@ -35,6 +35,12 @@ function Login() {
     );
 
     localStorage.setItem(
+      "email",
+      res.data.email
+    );
+
+
+    localStorage.setItem(
       "user",
       JSON.stringify(res.data.user)
     );
