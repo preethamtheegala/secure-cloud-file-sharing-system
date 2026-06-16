@@ -36,9 +36,12 @@ function Login() {
 
     localStorage.setItem(
       "email",
-      res.data.email
+      res.data.user.email
     );
 
+    console.log(res.data);
+    console.log(res.data.user);
+    console.log(res.data.user.email);
 
     localStorage.setItem(
       "user",
