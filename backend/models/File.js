@@ -24,9 +24,34 @@ const fileSchema = new mongoose.Schema(
 
     sharedWith: [
       {
-        type: String
+        email: {
+          type: String
+        },
+
+        permission: {
+          type: String,
+          enum: [
+            "view",
+            "download"
+          ],
+          default: "view"
+        },
+
+        expiresAt: {
+          type: Date
+        }
       }
-    ]
+    ],
+
+    secureToken: {
+      type: String,
+      default: null
+    },
+
+    secureTokenExpiry: {
+      type: Date,
+      default: null
+    }
   },
   {
     timestamps: true
