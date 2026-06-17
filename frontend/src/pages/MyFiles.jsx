@@ -277,7 +277,11 @@ const generateSecureLink =
         );
 
       const link =
-       `https://secure-cloud-file-sharing-system-lbe3.onrender.com/api/files/access/${res.data.token}`;
+      `${
+  window.location.hostname === "localhost"
+    ? "http://localhost:8000"
+    : "https://secure-cloud-file-sharing-system-lbe3.onrender.com"
+}/api/files/access/${res.data.token}`
 
       setSecureLink(link);
 
