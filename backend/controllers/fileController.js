@@ -20,7 +20,11 @@ export const uploadFile = async (req, res) => {
       });
     }
 
-    const tempFile =
+   if (!fs.existsSync("temp")) {
+  fs.mkdirSync("temp");
+}
+
+const tempFile =
   `temp/${Date.now()}-${req.file.originalname}`;
 
 fs.writeFileSync(
