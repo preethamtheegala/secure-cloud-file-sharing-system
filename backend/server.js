@@ -44,7 +44,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://secure-cloud-file-sharing-system.vercel.app"
+      "https://secure-cloud-file-sharing-system.vercel.app",
+      "https://secure-cloud-file-sharing-system-5q54u7lwv.vercel.app"
     ],
     credentials: true
   })
