@@ -32,30 +32,36 @@ fs.writeFileSync(
   req.file.buffer
 );
 
-const clamscan =
-  await getClamAV();
+if (process.env.NODE_ENV !== "production") {
 
-const scanResult =
-  await clamscan.scanFile(
-    tempFile
-  );
+  const clamscan =
+    await getClamAV();
+
+  const scanResult =
+    await clamscan.scanFile(
+      tempFile
+    );
+
+  if (
+    scanResult.isInfected
+  ) {
+
+    fs.unlinkSync(
+      tempFile
+    );
+
+    return res.status(400).json({
+      message:
+        "Malware detected. Upload blocked."
+    });
+
+  }
+
+}
 
 fs.unlinkSync(
   tempFile
 );
-
-if (
-  scanResult.isInfected
-) {
-
-  return res.status(400).json({
-    message:
-      "Malware detected. Upload blocked."
-  });
-
-}
-
-
 
     const streamUpload = () => {
       return new Promise((resolve, reject) => {
